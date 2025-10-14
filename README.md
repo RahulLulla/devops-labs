@@ -1,12 +1,4 @@
 # ServePerformanceStats
 
-Project URL:
-https://roadmap.sh/projects/server-stats
-
-Server Performance Stats
-Command:
-
-```
-chmod +x server-stats.sh
-sh server-stats.sh
-```
+1. [Server Performance Stats](https://roadmap.sh/projects/server-stats)
+2. [Log Archive Tool](https://roadmap.sh/projects/log-archive-tool)

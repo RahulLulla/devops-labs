@@ -1,4 +1,4 @@
-# ServePerformanceStats
+# server-stats
 
 ## Getting Started
 

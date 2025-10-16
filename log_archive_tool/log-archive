@@ -1,0 +1,89 @@
+#!/bin/bash
+delete_logs=false
+schedule=false
+
+dir_to_compress=""
+archive_dir_path=""
+
+check_dir_exists(){
+    local dir="$1"
+    if [[ ! -d "$dir" ]]; then
+        echo "Directory $dir doesn't exist "
+        exit 1
+    fi
+}
+
+archive_logs(){
+    log_file_path="$archive_dir_path/log_archive_$(date +%Y%m%d_%H%M%S).tar.gz"
+    tar -czf "$log_file_path" -C "$dir_to_compress" .
+    if [[ $? == 0 ]]; then
+        echo "Logs store in file: $log_file_path"
+    else
+        echo "Error occurred during archiving"
+        [[ -f "$log_file_path" ]] && rm "$log_file_path"
+        exit 1
+    fi
+}
+
+delete_logs(){
+    if [[ $delete_logs == true ]]; then
+        echo "Deleting original logs in $dir_to_compress"
+        rm -rf "$dir_to_compress"/*
+        [[ $? -eq 0 ]] && echo "Logs deleted successfully"
+    fi
+}
+
+schedule_job(){
+    if [[ $schedule == true ]]; then
+        cron_log_path="$archive_dir_path/log-archive-cron.log"
+        echo "Scheduling daily archiving at noon using cron. Check $cron_log_path for logs"
+        cron="* * * * * /usr/local/bin/log-archive -l '$dir_to_compress' -a '$archive_dir_path'"
+        [[ $delete_logs == true ]] && cron+=" -d"
+        cron+=" >> '$cron_log_path' 2>&1"
+        (crontab -l | grep -F "$cron" > /dev/null 2>&1) || {
+            (crontab -l; echo "$cron" | crontab - && echo "Cron Job Added")
+        }
+    fi
+}
+
+usage() {
+    echo "Usage: $0 -l <log_directory_to_compress> -a <archive_directory_path> [-d] [-s]"
+    echo "  -l : Directory containing logs to compress"
+    echo "  -a : Directory where the archive should be stored"
+    echo "  -d : Delete original logs after archiving (optional)"
+    echo "  -s : Schedule daily archiving at noon using cron (optional)"
+    echo "Example: $0 -l /var/log/myapp -a /var/archives -d -s"
+}
+
+while getopts "l:a:ds" option; do
+    case $option in
+        l)
+            dir_to_compress="$OPTARG"
+            check_dir_exists "$dir_to_compress"
+            ;;
+        a)
+            archive_dir_path="$OPTARG"
+            check_dir_exists "$archive_dir_path"
+            ;;
+        d)
+            delete_logs=true
+            ;;
+        s)
+            schedule=true
+            ;;
+        \?)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [[ -z "$dir_to_compress" || -z "$archive_dir_path" ]]; then
+    echo "Required fields not provided."
+    usage
+    exit 1
+fi
+
+archive_logs
+delete_logs
+schedule_job

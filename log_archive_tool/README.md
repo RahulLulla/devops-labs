@@ -27,4 +27,4 @@ Usage: log_archive_tool -l <log_directory_to_compress> -a <archive_directory_pat
 Example: log_archive_tool -l /var/log/myapp -a /var/archives -d -s
 
 Project URL:
-https://roadmap.sh/projects/server-stats
+https://roadmap.sh/projects/log-archive-tool

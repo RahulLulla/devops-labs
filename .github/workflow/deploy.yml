@@ -3,14 +3,14 @@ name: Deploy to GitHub Pages
 on:
   push:
     paths:
-      - "gh-deployment-workflow/index.html"
+      - "docs/index.html"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
   env:
-    BASE_URL: https://rlulla.github.io/gh-deployment-workflow
-    
+    BASE_URL: https://rahullulla.github.io/gh-deployment-workflow
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
